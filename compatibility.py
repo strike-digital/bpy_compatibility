@@ -1,15 +1,14 @@
 from typing import Any, Literal
 
-import bpy
 from bpy.types import (
     Area,
     AssetMetaData,
     Context,
     FileSelectEntry,
     NodeSocket,
-    NodeSocketInterface,
     NodeTree,
 )
+import bpy
 
 # Changes accounted for:
 # Active asset changed from context.asset_file_handle to context.asset
@@ -94,14 +93,14 @@ class CompatibleNodeTree:
         return items
 
     @property
-    def inputs(self) -> dict[str, NodeSocketInterface]:
+    def inputs(self) -> dict[str, NodeSocket]:
         if IS_4_0:
             return self.interface_items("INPUT")
         else:
             return self.node_tree.inputs
 
     @property
-    def outputs(self) -> dict[str, NodeSocketInterface]:
+    def outputs(self) -> dict[str, NodeSocket]:
         if IS_4_0:
             return self.interface_items("OUTPUT")
         else:
