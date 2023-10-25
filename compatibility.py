@@ -7,18 +7,17 @@ from bpy.types import (
     Context,
     FileSelectEntry,
     NodeSocket,
+    NodeSocketInterface,
     NodeTree,
 )
 
-# Changes:
-# V Active asset changed from context.asset_file_handle to context.asset
-# V Asset metadata changed from FileSelectEntry.asset_data to AssetRepresentation.metadata
-# V Active asset library name changed from asset_library_ref to asset_library_reference
-
-# API for interacting with node interfaces changed
+# Changes accounted for:
+# Active asset changed from context.asset_file_handle to context.asset
+# Asset metadata changed from FileSelectEntry.asset_data to AssetRepresentation.metadata
+# Active asset library name changed from asset_library_ref to asset_library_reference
+# API for interacting with node tree interfaces changed
 # Socket type changed from uppercase to idname
 # Socket type api changed from socket.type to socket.socket_type
-
 
 IS_4_0 = bpy.app.version >= (4, 0, 0)
 
@@ -57,6 +56,14 @@ def get_asset_import_method(area: Area) -> str:
     return params.import_method if IS_4_0 else params.import_type
 
 
+def get_socket_type(socket: NodeSocket) -> str:
+    """
+    Needed for 4.0 compatibility.
+    Get the type of the given socket
+    """
+    return socket.socket_type if IS_4_0 else socket.type
+
+
 class BpyDict(dict):
     """Used to mimic the behavior of the built in Collection Properties in Blender, which act as a
     mix of dictionaries and lists."""
@@ -71,6 +78,7 @@ class BpyDict(dict):
 
 
 class CompatibleNodeTree:
+    """A wrapper to allow the old 3.6 node tree interface api to be used with the new 4.0 api."""
     def __init__(self, node_tree: NodeTree):
         self.node_tree = node_tree
 
@@ -83,18 +91,17 @@ class CompatibleNodeTree:
         for item in self.node_tree.InterfaceError.items_tree:
             if item.item_type == "SOCKET" and item.in_out == type:
                 items[item.name] = item
-
         return items
 
     @property
-    def inputs(self):
+    def inputs(self) -> dict[str, NodeSocketInterface]:
         if IS_4_0:
             return self.interface_items("INPUT")
         else:
             return self.node_tree.inputs
 
     @property
-    def outputs(self):
+    def outputs(self) -> dict[str, NodeSocketInterface]:
         if IS_4_0:
             return self.interface_items("OUTPUT")
         else:
