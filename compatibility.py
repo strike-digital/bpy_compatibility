@@ -87,7 +87,7 @@ class CompatibleNodeTree:
 
     def interface_items(self, type: Literal["INPUT", "OUTPUT", "PANEL"]):
         items = BpyDict()
-        for item in self.node_tree.InterfaceError.items_tree:
+        for item in self.node_tree.interface.items_tree:
             if item.item_type == "SOCKET" and item.in_out == type:
                 items[item.name] = item
         return items
